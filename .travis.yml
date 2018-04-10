@@ -1,0 +1,19 @@
+language: go
+
+go:
+  - "1.8.x"
+  - "1.9.x"
+  - "1.10.x"
+
+services:
+  - mysql
+
+# let us have speedy Docker-based Travis workers
+sudo: false
+
+before_script:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS test;'
+
+script:
+  - go vet ./...
+  - go test -v ./...
