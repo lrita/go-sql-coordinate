@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"net"
 	"sync"
 	"time"
 
@@ -172,8 +173,7 @@ func (k *Keepalived) campaign(dying <-chan struct{}, epoch chan<- *Epoch) {
 			index, session, err = k.acquire(lastindex, challenge)
 		}
 
-		switch err {
-		case nil:
+		if err == nil {
 			netfault = false
 			switch {
 			case session != lastsession:
@@ -187,14 +187,14 @@ func (k *Keepalived) campaign(dying <-chan struct{}, epoch chan<- *Epoch) {
 					challenge = true
 				}
 			}
-		case driver.ErrBadConn, mysql.ErrInvalidConn:
+		} else if _, ok := err.(net.Error); ok || err == driver.ErrBadConn || err == mysql.ErrInvalidConn {
 			if !netfault {
 				epoch <- &Epoch{Event: NetworkFault}
 			}
 			lastsession, challenge, netfault, lastindex, count = "", false, true, 0, 0
-		case sql.ErrNoRows:
+		} else if err == sql.ErrNoRows {
 			return
-		default:
+		} else {
 			epoch <- &Epoch{Event: UnknownFault}
 			return
 		}

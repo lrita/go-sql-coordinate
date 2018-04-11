@@ -26,7 +26,7 @@ type fsuite struct {
 }
 
 func (s *fsuite) SetupSuite() {
-	db, err := sql.Open("mysql", dsn+"?charset=utf8&parseTime=True&loc=Local")
+	db, err := sql.Open("mysql", dsn+"?charset=utf8&parseTime=True&loc=Local&timeout=1s&writeTimeout=3s&readTimeout=3s")
 	s.Require().NoError(err)
 	s.db = db
 }

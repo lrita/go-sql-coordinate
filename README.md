@@ -18,7 +18,8 @@ import (
 )
 
 func main() {
-    db, err := sql.Open("mysql", "root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local")
+    // Recommend set a timeout with mysql, which will make it sensitive when network broken down.
+    db, err := sql.Open("mysql", "root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1s&writeTimeout=3s&readTimeout=3s)
     if err != nil {
         log.Fatal(err)
     }
